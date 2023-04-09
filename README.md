@@ -20,7 +20,7 @@ pip install -r requirements.txt
 ## Tutorial
 A detailed interactive tutorial can be found in ```tutorial/tutorial.ipynb```. The tutorial requires Jupyter notebook to run. A PDF version of the tutorial can be found in ```tutorial.pdf```.
 
-## Demos
+<!--## Demos
 The package comes with several examples in the  ```demo/``` folder. Run these as:
 
 ```
@@ -55,3 +55,4 @@ The source code of the package is contained in the verse folder, which contains 
 
 
 - **plotter** contains code for visualizing the computed results
+-->
