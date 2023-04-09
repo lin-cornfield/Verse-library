@@ -56,3 +56,9 @@ The source code of the package is contained in the verse folder, which contains 
 
 - **plotter** contains code for visualizing the computed results
 -->
+
+## Instructions for >Verification of 
+| Syntax | Description |
+| ----------- | ----------- |
+| Header | Title |
+| Paragraph | Text |
