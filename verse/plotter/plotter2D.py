@@ -431,7 +431,7 @@ def simulation_anime(root: Union[AnalysisTree, AnalysisTreeNode], map=None, fig=
     return fig
 
 
-def reachtube_tree(root: Union[AnalysisTree, AnalysisTreeNode], map=None, fig=go.Figure(), x_dim: int = 1, y_dim: int = 2, print_dim_list=None, map_type='lines', scale_type='trace', label_mode='None', sample_rate=1, combine_rect=1, plot_color = None):
+def reachtube_tree(root: Union[AnalysisTree, AnalysisTreeNode], map=None, fig=go.Figure(), x_dim: int = 1, y_dim: int = 2, print_dim_list=None, map_type='lines', scale_type='trace', label_mode='None', sample_rate=1, combine_rect=1, plot_color = None, name=None):
     """It statically shows all the traces of the verfication."""
     if plot_color is None:
         plot_color = colors
@@ -489,7 +489,7 @@ def reachtube_tree(root: Union[AnalysisTree, AnalysisTreeNode], map=None, fig=go
                                              textfont=dict(
                         size=text_size,
                         color=mode_text_color),
-                        showlegend=False,
+                        showlegend=False
                     ))
                     previous_mode[agent_id] = node.mode[agent_id]
                 if node.assert_hits != None and agent_id in node.assert_hits[0]:
