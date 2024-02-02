@@ -29,7 +29,8 @@ class quadrotor_agent(BaseAgent):
         self.As_omega = -5.0 # parameter for L1
         # self.dt_L1 = 0.00003448 # sample time for L1 AC, for simplicity, set the same as the simulation step size
         # self.dt_L1 = 0.000033 # perfect value for time-delay system
-        self.dt_L1 = 0.025
+        # self.dt_L1 = 0.015
+        self.dt_L1 = 0.005
         """ For large uncertainties ..."""
         self.ctoffq1Thrust = 5*7 # cutoff frequency for thrust channel LPF (rad/s)
         self.ctoffq1Moment = 5*7 # cutoff frequency for moment channels LPF1 (rad/s)
@@ -928,7 +929,7 @@ class quadrotor_agent(BaseAgent):
         W = state[15:18] # angular velocity
         mass = state[18:19] # mass parameter
         self.tau = 0.0 # no time delay
-        self.use_l1ac = True
+        self.use_l1ac = False
         t = state[19:]
         # if (t >= 2 and t < 4):
         #     mass = 1.3*state[18:19] # mass for simulation, changed to a new parameter after 5 seconds
