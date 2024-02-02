@@ -57,9 +57,9 @@ The source code of the package is contained in the verse folder, which contains 
 - **plotter** contains code for visualizing the computed results
 -->
 
-## Instructions for [Verification of L1AC using Verse Library: A Case Study of Quadrotors](https://arxiv.org/abs/2303.13819).
+## Instructions for [Verification of Design Specifications in \mathcal{L}_1 Adaptive Control]([https://arc.aiaa.org/doi/10.2514/6.2024-1165]).
 **The ```text``` below includes modifications needed to generate ALL the verification test cases.**
-| File Name | Experiment 1: Transient Performance Verification | Experiment 2: Delay Margin Verification |
+| File Name | Experiment 1: Verification of adaptation versus robustness| Experiment 2: Verification of filter design|
 | -----------| -----------|---------- |
 | 'quadrotor_agent.py' | In the ```dynamic_mode7(t, state)``` function: <br /> <ul><li>Set L1AC Flag to ```True/False```.</li></ul> |  In the ```dynamic_mode8(t, state)``` function: <br/> <ul><li>Make sure 'self.L1AC = True';</li><li>Set the time delay ```self.tau``` to a desired amount (i.e. time shift on the control input) for delay margin verification.</li></ul>|
 | 'quadrotor_demo.py'| In the ```set_init``` function: <br /> <ul><li>Make sure the mass parameter $[l_b,u_b] = [3.34, 5.34]$;</li><li> Make sure the last argument is Mode7.</li></ul> |  In the ```set_init``` function: <br/> <ul><li>Make sure the mass parameter $[l_b,u_b] = [7.34, 9.34]$;</li><li> Make sure the last argument is Mode8.</li></ul>|
