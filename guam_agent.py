@@ -46,7 +46,7 @@ class guam_agent(BaseAgent):
         self.surf_eng = SurfEngine()
         self.aero_prop = FuncAeroProp()
 
-        self.dt = 0.1
+        self.dt = 0.01
         # self.state = GuamState.create()
         self.checker = 0
         
