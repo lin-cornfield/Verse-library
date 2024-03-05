@@ -33,6 +33,7 @@ from loguru import logger
 
 
 
+
 class guam_agent(BaseAgent):
     def __init__(self, id, code=None, file_name=None):
         # Calling the constructor of tha base class
@@ -46,7 +47,7 @@ class guam_agent(BaseAgent):
         self.surf_eng = SurfEngine()
         self.aero_prop = FuncAeroProp()
 
-        self.dt = 0.01
+        self.dt = 0.005
         # self.state = GuamState.create()
         self.checker = 0
         
@@ -80,21 +81,27 @@ class guam_agent(BaseAgent):
 
     #     return X_dot
     def step(self, dt: float, state: GuamState, ref_inputs: RefInputs) -> GuamState:
+        # print("debugging purpose-----")
+       
         deriv_fn = ft.partial(self.deriv, ref_inputs=ref_inputs)
+        # print(state.controller.int_e_long.dtype)
         state_new = ode3(deriv_fn, dt, state)
+        # print(state_new.controller.int_e_long.dtype)
         # We also need to clip the state.
         state_new = state_new._replace(surf_eng=self.surf_eng.clip_state(state_new.surf_eng))
+        # print(state_new.controller.int_e_long.dtype)
         return state_new
 
 
-    def action_handler(self, mode, state_guam, ref):
-        if mode == 'Mode1':
-            return self.step(self.dt, state_guam, ref)
-        else:
-            raise ValueError
+    # def action_handler(self, mode, state_guam, ref):
+    #     if mode == 'Mode1':
+    #         return self.step(self.dt, state_guam, ref)
+    #     else:
+    #         raise ValueError
     
     def array2GuamState(self, state_arr):
-      
+        # print("---for debug purpose----")
+        # print(state_arr)
         e_long = state_arr[0:3]
         e_lat = state_arr[3:6]
         aircraft_state = np.array(state_arr[6:19])
@@ -103,9 +110,9 @@ class guam_agent(BaseAgent):
         lc_control_state = LCControlState(int_e_long=np.array(e_long), int_e_lat=np.array(e_lat))
         surf_engine_state = SurfEngineState(ctrl_surf_state=np.array(surf_state))
         # Aircraft_state = AircraftState(np.array(aircraft_state[0:3]), np.array(aircraft_state[3:6]), np.array(aircraft_state[6:9]), np.array(aircraft_state[9:13]))
-        
-        
-        
+     
+        # print("----for debug purpose---")
+        # print(test)
         return GuamState(
             controller=lc_control_state,
             aircraft=aircraft_state,
@@ -118,7 +125,7 @@ class guam_agent(BaseAgent):
         int_e_lat = state_guam.controller.int_e_lat
         aircraft = state_guam.aircraft
         ctrl_surf_state = state_guam.surf_eng.ctrl_surf_state
-       
+        
         
         return np.concatenate((int_e_long, int_e_lat, aircraft, ctrl_surf_state)).tolist()
     
@@ -126,28 +133,38 @@ class guam_agent(BaseAgent):
 
     def TC_simulate(self, mode: List[str], initialCondition, time_bound, time_step, lane_map: LaneMap = None) -> np.ndarray:
 
-
-        time_bound = float(time_bound)
-        number_points = int(np.ceil(time_bound/time_step))
-        t = [round(i*time_step, 10) for i in range(0, number_points)]
         
-
+        # time_bound = float(time_bound)
+        # number_points = int(np.ceil(time_bound/time_step))
+        # t = [round(i*time_step, 10) for i in range(0, number_points)]
+        jax_use_double()
+        T = int(time_bound/ self.dt)
 
         state_arr = initialCondition
         state = self.array2GuamState(state_arr)
+        # jstep = jax.jit(self.step)
+        print("---for debug purpose----")
+        
+        # state = GuamState.create()
+        
         trace = [[0]+state_arr]
-        r = self.action_handler(mode[0], state, lift_cruise_reference_inputs(0))
-        # r.set_integrator('dopri5', nsteps=6000).set_initial_value(init)  
-        for i in range(len(t)):
-            curr_t = i * self.dt
-            print(curr_t)
+        # r = self.action_handler(mode[0], state, lift_cruise_reference_inputs(0))
+        # r.set_integrator('dopri5', nsteps=6000).set_initial_value(init) 
+        # print((0, state))
+        for kk in range(T):
+            curr_t = kk * self.dt
+            # print(curr_t)
             # res: np.ndarray = r.integrate(r.t + time_step)
             # init = res.flatten().tolist()
             ref_input = lift_cruise_reference_inputs(curr_t)
+            # print(curr_t)
+            # print(ref_input.Vel_bIc_des)
+            
             state = self.step(self.dt, state, ref_input)
-
             state_arr = self.GuamState2array(state)
-            trace.append([t[i] + time_step] + state_arr)
+            trace.append([curr_t + self.dt] + state_arr)
+            # print((curr_t + self.dt, state.aircraft))
+        
         self.checker = self.checker + 1
         # print(trace)
         return np.array(trace)

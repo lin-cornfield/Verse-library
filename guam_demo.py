@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from enum import Enum, auto
 
 import matplotlib.pyplot as plt
-from verse.plotter.plotter2D import reachtube_tree
+from verse.plotter.plotter2D import reachtube_tree, simulation_tree
 from verse.plotter.plotter2D_old import plot_reachtube_tree, plot_simulation_tree
 import os
 
@@ -28,7 +28,8 @@ class AgentMode(Enum):
     
 """ some comments in running the verification:
 1. The verification step size is set as the guam sim step size (in the guam agent initialization) for simplicity;
-2. Sensitive to the initial condition choice"""
+2. Sensitive to the initial condition choice
+3. Need to have the jax guam installed properly """
 
 if __name__ == "__main__":
     input_code_name = './guam_controller.py'
@@ -41,15 +42,15 @@ if __name__ == "__main__":
             # TODO: Fix the following upper and lower bounds of the states' initial conditions
              #24 states (6 Control States, 13 Aircraft States, 5 Surf Eng state)
         [   
-           [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.00069017, 0, -8, 0.0, 0.0, 0.0, -0.01, -0.01, 0.0, 1.0, 0.0, -4.3136e-05, 0.0, 0.0, 0.0, -0.000780906088785921, -0.000780906088785921, 0.0],
-           [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.00069017, 0, -8, 0.0, 0.0, 0.0, 0.01, 0.01, 0.0, 1.0, 0.0, -4.3136e-05, 0.0, 0.0, 0.0, -0.000780906088785921, -0.000780906088785921, 0.0]
+           [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.00069017, 0, -8, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 1.0, 0.0, -4.3136e-05, 0.0, 0.0, 0.0, -0.000780906088785921, -0.000780906088785921, 0.0],
+           [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.00069017, 0, -8, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 1.0, 0.0, -4.3136e-05, 0.0, 0.0, 0.0, -0.000780906088785921, -0.000780906088785921, 0.0]
         ], 
         ],
         [
             tuple([AgentMode.Mode1]),
         ]
     )
-    t_max = 10 # for fast mass change only
+    t_max = 45 # for fast mass change only
 
     # TODO: plot the reference input for the Guam model
     N = int(100*t_max + 1)
@@ -66,7 +67,8 @@ if __name__ == "__main__":
         y_des_array.append(Pos_des[1])
         z_des_array.append(Pos_des[2])
 
-    traces = scenario.verify(t_max, 0.01, params={"bloating_method": "GLOBAL"})
+    traces = scenario.verify(t_max, 0.005, params={"bloating_method": "GLOBAL"})
+   
     # print(traces.root)
     # traces.dump('./demo/guam/output_result_guam.json') 
 
@@ -93,19 +95,21 @@ if __name__ == "__main__":
     
     plt.xlabel('t [sec]')
     plt.ylabel('x [m]')
-    fig1 = plot_reachtube_tree(traces.root, 'guam1', 0, [12], fig=fig1)
+    fig1 = plot_reachtube_tree(traces.root, 'guam1', 0, [13], fig=fig1)
     
     plt.xlabel('t [sec]')
     plt.ylabel('y [m]')
-    fig2 = plot_reachtube_tree(traces.root, 'guam1', 0, [13], fig=fig2)
+    fig2 = plot_reachtube_tree(traces.root, 'guam1', 0, [14], fig=fig2)
     
     plt.xlabel('t [sec]')
     plt.ylabel('z [m]')
-    fig3 = plot_reachtube_tree(traces.root, 'guam1', 0, [14], fig=fig3)
+    fig3 = plot_reachtube_tree(traces.root, 'guam1', 0, [15], fig=fig3)
+    
+    
     
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
-    fig4 = reachtube_tree(traces, None, fig4, 12, 13,
+    fig4 = reachtube_tree(traces, None, fig4, 13, 14,
                              print_dim_list=[1,2])
     fig4.show()
     
