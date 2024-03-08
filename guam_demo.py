@@ -28,8 +28,7 @@ class AgentMode(Enum):
     
 """ some comments in running the verification:
 1. The verification step size is set as the guam sim step size (in the guam agent initialization) for simplicity;
-2. Sensitive to the initial condition choice
-3. Need to have the jax guam installed properly """
+2. Need to have the jax guam installed properly """
 
 if __name__ == "__main__":
     input_code_name = './guam_controller.py'
@@ -42,8 +41,8 @@ if __name__ == "__main__":
             # TODO: Fix the following upper and lower bounds of the states' initial conditions
              #24 states (6 Control States, 13 Aircraft States, 5 Surf Eng state)
         [   
-           [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.00069017, 0, -8, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 1.0, 0.0, -4.3136e-05, 0.0, 0.0, 0.0, -0.000780906088785921, -0.000780906088785921, 0.0],
-           [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.00069017, 0, -8, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 1.0, 0.0, -4.3136e-05, 0.0, 0.0, 0.0, -0.000780906088785921, -0.000780906088785921, 0.0]
+           [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.00069017, 0, -8, 0.0, 0.0, 0.0, 0, 0, -100, 1.0, 0.0, -4.3136e-05, 0.0, 0.0, 0.0, -0.000780906088785921, -0.000780906088785921, 0.0],
+           [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.00069017, 0, -8, 0.0, 0.0, 0.0, 0, 0, 0, 1.0, 0.0, -4.3136e-05, 0.0, 0.0, 0.0, -0.000780906088785921, -0.000780906088785921, 0.0]
         ], 
         ],
         [
@@ -67,7 +66,7 @@ if __name__ == "__main__":
         y_des_array.append(Pos_des[1])
         z_des_array.append(Pos_des[2])
 
-    traces = scenario.verify(t_max, 0.005, params={"bloating_method": "GLOBAL"})
+    traces = scenario.verify(t_max, 0.01, params={"bloating_method": "GLOBAL"})
    
     # print(traces.root)
     # traces.dump('./demo/guam/output_result_guam.json') 

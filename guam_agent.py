@@ -14,6 +14,7 @@ import functools as ft
 import ipdb
 import jax
 import jax.random as jr
+import jax.numpy as jnp
 import jax.tree_util as jtu
 import numpy as np
 import tqdm # for progress bar
@@ -22,7 +23,7 @@ from jax_guam.functional.aero_prop_new import FuncAeroProp
 from jax_guam.functional.lc_control import LCControl, LCControlState
 from jax_guam.functional.surf_engine import SurfEngine, SurfEngineState
 from jax_guam.functional.vehicle_eom_simple import VehicleEOMSimple
-from jax_guam.guam_types import AircraftState, AircraftStateVec, EnvData, PwrCmd, RefInputs
+from jax_guam.guam_types import AircraftState, AircraftStateVec, EnvData, PwrCmd, RefInputs, Failure_Engines
 from jax_guam.subsystems.environment.environment import Environment
 from jax_guam.subsystems.genctrl_inputs.genctrl_inputs import lift_cruise_reference_inputs
 from jax_guam.subsystems.vehicle_model_ref.power_system import power_system
@@ -46,8 +47,27 @@ class guam_agent(BaseAgent):
         self.veh_eom = VehicleEOMSimple()
         self.surf_eng = SurfEngine()
         self.aero_prop = FuncAeroProp()
+        self.failure = Failure_Engines(
+            F_Fail_Initiate=jnp.array([0,0,0,0,0,0,0,0,0]), #jnp.zeros(9)
+            F_Hold_Last=jnp.zeros(9),
+            F_Pre_Scale=jnp.ones(9),
+            F_Post_Scale=jnp.ones(9),
+            F_Pos_Bias=jnp.zeros(9),
+            F_Pos_Scale=jnp.ones(9),
+            F_Up_Plim=jnp.zeros(9) + jnp.inf,
+            F_Lwr_Plim=jnp.zeros(9) - jnp.inf,
+            F_Rate_Bias=jnp.zeros(9),
+            F_Rate_Scale=jnp.ones(9),
+            F_Up_Rlim=jnp.zeros(9) + jnp.inf,
+            F_Lwr_Rlim=jnp.zeros(9) - jnp.inf,
+            F_Accel_Bias=jnp.zeros(9),
+            F_Accel_Scale=jnp.ones(9),
+            F_Up_Alim=jnp.zeros(9) + jnp.inf,
+            F_Lwr_Alim=jnp.zeros(9) - jnp.inf,
+            F_Gen_Sig_Sel=jnp.zeros(15),
+        )
 
-        self.dt = 0.005
+        self.dt = 0.01
         # self.state = GuamState.create()
         self.checker = 0
         
@@ -67,7 +87,7 @@ class guam_agent(BaseAgent):
         pwr_cmd = PwrCmd(CtrlSurfacePwr=control.Cmd.CtrlSurfacePwr, EnginePwr=control.Cmd.EnginePwr)
         power = power_system(pwr_cmd)
 
-        surf_act, prop_act = self.surf_eng.get_surf_prop_act(state.surf_eng, control.Cmd, power)
+        surf_act, prop_act = self.surf_eng.get_surf_prop_act(state.surf_eng, control.Cmd, power, self.failure)
         d_state_surf_eng = self.surf_eng.surf_engine_state_deriv(control.Cmd, state.surf_eng)
 
         fm = self.aero_prop.aero_prop(prop_act, surf_act, env_data, aeroprop_body_data)
