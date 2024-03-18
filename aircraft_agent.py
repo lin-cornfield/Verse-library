@@ -7,6 +7,7 @@ import torch
 
 
 import numpy.linalg as la
+import random
 
 # from tutorial_utils import drone_params
 from verse import BaseAgent
@@ -173,7 +174,8 @@ class AircraftAgent(BaseAgent):
             # return lift_cruise_reference_inputs_coc(self.dt, state)
         else:
             # return None
-            return lift_cruise_reference_inputs_cmd(curr_time, time_bound, init_state, curr_state, self.dt, cmd)
+            return lift_cruise_reference_inputs_turn_right(curr_time, time_bound, init_state, cmd)
+            # return lift_cruise_reference_inputs_turn_random(curr_time, time_bound, init_state, cmd_list)
 
 
     def action_handler(self, mode: str, state, lane_map: LaneMap) -> int:
@@ -219,20 +221,33 @@ class AircraftAgent(BaseAgent):
             # decisions=decisions.tolist()
             decisions = []
             for _ in range(T):
-                decisions.append(np.randint(0,4))
+                decisions.append(random.randint(0,4))
             decisions = decisions.tolist()     
         else:
             decisions =[4]*T
         # decisions = [0]*T
         trace = [[0]+state_arr]
         # time_elapse_mats = init_time_elapse_mats(dt_acas)
+        cmd_list = []
+        length = int(time_bound / 0.01) + 1
+        for i in range(length):
+            if i < length/3:
+                cmd_list.append(1)
+            elif i < 7*length/8:
+                cmd_list.append(3)
+            else:
+                cmd_list.append(0)
+        
+        
+        # spl_vel_bIc, spl_pos_bii = initialize_reference_inputs(time_bound, initGuamState, cmd_list)
         for kk in range(T):
             # print(mode)
             cmd = decisions[kk]
-            curr_t = (kk+1) * self.dt
+            curr_t = (kk) * self.dt
             # print(cmd)
             # ref_input = self.cmd2ref(cmd, state)
-            ref_input = self.cmd2ref(curr_t, time_bound, initGuamState, state, cmd)
+            # ref_input = self.cmd2ref(curr_t, time_bound, initGuamState, state, cmd) # for the single command for the horizon
+            ref_input = lift_cruise_reference_inputs_turn_random(curr_t, time_bound, initGuamState, cmd_list)
             state = self.step(self.dt, state, ref_input)
             # print(vec[1])
             state_arr = self.GuamState2array(state, kk+1)
